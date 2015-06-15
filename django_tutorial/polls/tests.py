@@ -4,8 +4,8 @@ import datetime
 from django.utils import timezone
 from django.test import TestCase
 from django.core.urlresolvers import reverse
-
 from polls.models import Question
+from polls.test_utils import create_question
 
 class QuestionMethodTests(TestCase):
 
@@ -18,33 +18,23 @@ class QuestionMethodTests(TestCase):
         future_question = Question(pub_date=time)
         self.assertEqual(future_question.was_published_recently(), False)
 
-def test_was_published_recently_with_old_question(self):
-    """
-    was_published_recently() should return False for questions whose
-    pub_date is older than 1 day.
-    """
-    time = timezone.now() - datetime.timedelta(days=30)
-    old_question = Question(pub_date=time)
-    self.assertEqual(old_question.was_published_recently(), False)
+    def test_was_published_recently_with_old_question(self):
+        """
+        was_published_recently() should return False for questions whose
+        pub_date is older than 1 day.
+        """
+        time = timezone.now() - datetime.timedelta(days=30)
+        old_question = Question(pub_date=time)
+        self.assertEqual(old_question.was_published_recently(), False)
 
-def test_was_published_recently_with_recent_question(self):
-    """
-    was_published_recently() should return True for questions whose
-    pub_date is within the last day.
-    """
-    time = timezone.now() - datetime.timedelta(hours=1)
-    recent_question = Question(pub_date=time)
-    self.assertEqual(recent_question.was_published_recently(), True)
-
-def create_question(question_text, days):
-    """
-    Creates a question with the given `question_text` published the given
-    number of `days` offset to now (negative for questions published
-    in the past, positive for questions that have yet to be published).
-    """
-    time = timezone.now() + datetime.timedelta(days=days)
-    return Question.objects.create(question_text=question_text,
-                                   pub_date=time)
+    def test_was_published_recently_with_recent_question(self):
+        """
+        was_published_recently() should return True for questions whose
+        pub_date is within the last day.
+        """
+        time = timezone.now() - datetime.timedelta(hours=1)
+        recent_question = Question(pub_date=time)
+        self.assertEqual(recent_question.was_published_recently(), True)
 
 
 class QuestionViewTests(TestCase):
@@ -128,3 +118,23 @@ class QuestionIndexDetailTests(TestCase):
                                    args=(past_question.id,)))
         self.assertContains(response, past_question.question_text,
                             status_code=200)
+
+class PollModelTest(TestCase):
+    def test_creating_a_new_poll_and_saving_it_to_the_database(self):
+        # start by creating a new Poll object with its "question" set
+        poll = Question()
+        poll.question_text = "What's up?"
+        poll.pub_date = timezone.now()
+
+        # check we can save it to the database
+        poll.save()
+
+        # now check we can find it in the database again
+        all_polls_in_database = Question.objects.all()
+        self.assertEquals(len(all_polls_in_database), 1)
+        only_poll_in_database = all_polls_in_database[0]
+        self.assertEquals(only_poll_in_database, poll)
+
+        # and check that it's saved its two attributes: question and pub_date
+        self.assertEquals(only_poll_in_database.question_text, "What's up?")
+        self.assertEquals(only_poll_in_database.pub_date, poll.pub_date)
