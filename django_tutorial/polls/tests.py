@@ -183,3 +183,32 @@ class ChoiceModelTest(TestCase):
         self.assertEquals(choice_from_db, choice)
         self.assertEquals(choice_from_db.choice_text, "doin' fine...")
         self.assertEquals(choice_from_db.votes, 3)
+
+class HomePageViewTest(TestCase):
+
+    def test_root_url_shows_links_to_all_polls(self):
+        # set up some polls
+        poll1 = Question(question_text='6 times 7', pub_date=timezone.now())
+        poll1.save()
+        poll2 = Question(question_text='life, the universe and everything', pub_date=timezone.now())
+        poll2.save()
+
+        response = self.client.get('/polls/')
+        # check we've used the right template
+        self.assertTemplateUsed(response, 'polls/index.html')
+
+        # check we've passed the polls to the template
+        polls_in_context = response.context['latest_question_list']
+
+        #As it orders by the most recent first, change the order to test -> poll2, poll1
+        self.assertEquals(list(polls_in_context), [poll2, poll1])
+
+        # check the poll names appear on the page
+        self.assertIn(poll1.question_text, response.content)
+        self.assertIn(poll2.question_text, response.content)
+
+        # check the page also contains the urls to individual polls pages
+        poll1_url = reverse('polls:detail', args=[poll1.id,])
+        self.assertIn(poll1_url, response.content)
+        poll2_url = reverse('polls:detail', args=[poll2.id,])
+        self.assertIn(poll2_url, response.content)
