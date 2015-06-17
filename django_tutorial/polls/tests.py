@@ -1,6 +1,6 @@
-from django.test import TestCase
 import datetime
 
+from forms import QuestionVoteForm
 from django.utils import timezone
 from django.test import TestCase
 from django.core.urlresolvers import reverse
@@ -212,3 +212,79 @@ class HomePageViewTest(TestCase):
         self.assertIn(poll1_url, response.content)
         poll2_url = reverse('polls:detail', args=[poll2.id,])
         self.assertIn(poll2_url, response.content)
+
+class SinglePollViewTest(TestCase):
+
+    def test_page_shows_poll_title_and_no_votes_message(self):
+        # set up two polls, to check the right one is displayed
+        poll1 = Question(question_text='6 times 7', pub_date=timezone.now())
+        poll1.save()
+        poll2 = Question(question_text='life, the universe and everything', pub_date=timezone.now())
+        poll2.save()
+
+        response = self.client.get('/polls/%d/' % (poll2.id, ))
+
+        # check we've used the poll template
+        self.assertTemplateUsed(response, 'polls/detail.html')
+
+        # check we've passed the right poll into the context
+        self.assertEquals(response.context['question'], poll2)
+
+        # check the poll's question appears on the page
+        self.assertIn(poll2.question_text, response.content)
+
+        # check our 'no votes yet' message appears
+        # self.assertIn('No-one has voted on this poll yet', response.content)
+
+    def test_page_shows_choices_using_form(self):
+        # set up a poll with choices
+        poll1 = Question(question_text='time', pub_date=timezone.now())
+        poll1.save()
+        choice1 = Choice(question=poll1, choice_text="PM", votes=0)
+        choice1.save()
+        choice2 = Choice(question=poll1, choice_text="Gardener's", votes=0)
+        choice2.save()
+
+        response = self.client.get('/polls/%d/' % (poll1.id, ))
+
+        # check we've passed in a form of the right type
+        #Not in the Django official tutorial
+        #self.assertTrue(isinstance(response.context['form'], QuestionVoteForm))
+
+        # and check the form is being used in the template,
+        # by checking for the choice text
+        self.assertIn(choice1.choice_text, response.content.replace('&#39;', "'"))
+        self.assertIn(choice2.choice_text, response.content.replace('&#39;', "'"))
+
+class PollsVoteFormTest(TestCase):
+
+    def test_form_renders_poll_choices_as_radio_inputs(self):
+        # set up a poll with a couple of choices
+        poll1 = Question(question_text='6 times 7', pub_date=timezone.now())
+        poll1.save()
+        choice1 = Choice(question=poll1, choice_text='42', votes=0)
+        choice1.save()
+        choice2 = Choice(question=poll1, choice_text='The Ultimate Answer', votes=0)
+        choice2.save()
+
+        # set up another poll to make sure we only see the right choices
+        poll2 = Question(question_text='time', pub_date=timezone.now())
+        poll2.save()
+        choice3 = Choice(question=poll2, choice_text='PM', votes=0)
+        choice3.save()
+
+        # build a voting form for poll1
+        form = QuestionVoteForm(poll=poll1)
+
+        # check it has a single field called 'vote', which has right choices:
+        self.assertEquals(form.fields.keys(), ['vote'])
+
+        # choices are tuples in the format (choice_number, choice_text):
+        self.assertEquals(form.fields['vote'].choices, [
+            (choice1.id, choice1.choice_text),
+            (choice2.id, choice2.choice_text),
+        ])
+
+        # check it uses radio inputs to render
+        self.assertIn('type="radio"', form.as_p())
+

@@ -1,10 +1,7 @@
-from django.test import LiveServerTestCase, TestCase
+from django.test import LiveServerTestCase
 from selenium import webdriver
 import time
-from django.utils import timezone
 from selenium.webdriver.common.keys import Keys
-from polls.models import Question
-from django.core.urlresolvers import reverse
 from tests_utils import POLL1, POLL2
 
 class PollsTest(LiveServerTestCase):
@@ -131,7 +128,6 @@ class PollsTest(LiveServerTestCase):
             # Saves her new poll
             save_button = self.browser.find_element_by_css_selector("input[value='Save']")
             save_button.click()
-            self.browser.implicitly_wait(15)
             # Is returned to the "Polls" listing, where she can see her
             # new poll, listed as a clickable link by its name
             new_poll_links = self.browser.find_elements_by_link_text(
@@ -154,8 +150,9 @@ class PollsTest(LiveServerTestCase):
         # Now, Herbert the regular user goes to the homepage of the site. He
         # sees a list of polls.
         self.browser.get(self.live_server_url + '/polls')
-        heading = self.browser.find_element_by_tag_name('h1')
-        self.assertEquals(heading.text, 'Polls')
+        #Not in the django tutorial
+        #heading = self.browser.find_element_by_tag_name('h1')
+        #self.assertEquals(heading.text, 'Polls')
 
         # He clicks on the link to the first Poll, which is called
         # 'How awesome is test-driven development?'
@@ -164,13 +161,45 @@ class PollsTest(LiveServerTestCase):
 
         # He is taken to a poll 'results' page, which says
         # "no-one has voted on this poll yet"
-        main_heading = self.browser.find_element_by_tag_name('h1')
-        self.assertEquals(main_heading.text, 'Poll Results')
-        sub_heading = self.browser.find_element_by_tag_name('h2')
+        #Not in the Django tutorial
+        #main_heading = self.browser.find_element_by_tag_name('h1')
+        #self.assertEquals(main_heading.text, 'Poll Results')
+        sub_heading = self.browser.find_element_by_tag_name('h1')
         self.assertEquals(sub_heading.text, first_poll_title)
-        body = self.browser.find_element_by_tag_name('body')
-        self.assertIn('No-one has voted on this poll yet', body.text)
 
+        #Not in the Django tutorial
+        #body = self.browser.find_element_by_tag_name('body')
+        #self.assertIn('No-one has voted on this poll yet', body.text)
+
+        # He also sees a form, which offers him several choices.
+        # There are three options with radio buttons
+        choice_inputs = self.browser.find_elements_by_css_selector(
+                "input[type='radio']"
+        )
+        self.assertEquals(len(choice_inputs), 3)
+
+        # The buttons have labels to explain them
+        choice_labels = self.browser.find_elements_by_tag_name('label')
+        choices_text = [c.text for c in choice_labels]
+        self.assertEquals(choices_text, [
+            'Very awesome',
+            'Quite awesome',
+            'Moderately awesome',
+        ])
+        # He decided to select "very awesome", which is answer #1
+        chosen = self.browser.find_element_by_css_selector(
+                "input[id='choice1']"
+        )
+        chosen.click()
+
+        # Herbert clicks 'submit'
+        self.browser.find_element_by_css_selector(
+                "input[type='submit']"
+            ).click()
+
+        # The page refreshes, and he sees that his choice
+        # has updated the results.  they now say
+        # "100 %: very awesome".
         self.fail('TODO')
 
         # He clicks on the link to the first Poll, which is called
