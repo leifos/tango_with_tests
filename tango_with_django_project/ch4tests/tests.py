@@ -38,7 +38,7 @@ class Chapter4ViewTests(TestCase):
     def test_index_contains_hello_message(self):
         # Check if there is the message 'hello world!'
         response = self.client.get('/rango/')
-        self.assertIn('Rango says hey there world!', response.content)
+        self.assertIn('Rango says', response.content)
 
     def test_about_contains_create_message(self):
         # Check if in the about page is there a message
