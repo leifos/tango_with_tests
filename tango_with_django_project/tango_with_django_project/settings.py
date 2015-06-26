@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     'rango',
     'ch4tests',
     'ch5tests',
+    'ch6tests',
 )
 
 MIDDLEWARE_CLASSES = (
