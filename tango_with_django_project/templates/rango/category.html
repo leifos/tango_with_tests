@@ -1,30 +1,30 @@
-<!DOCTYPE html>
-<html>
+{% extends 'base.html' %}
 
-    {% load staticfiles %}
+{% load staticfiles %}
 
-    <head>
-        <title>Rango</title>
-    </head>
+{% block title %}{{ category_name }}{% endblock %}
 
-    <body>
-        <h1>{{ category_name }}</h1>
-        {% if category %}
-            <a href="/rango/category/{{ category_slug }}/add_page/"><strong>Add a page to this category!</strong></a><br/>
-            {% if pages %}
-            <ul>
+{% block body_block %}
+    <h1>{{ category_name }}</h1>
+    {% if category %}
+        {% if pages %}
+        <ul>
                 {% for page in pages %}
                 <li><a href="{{ page.url }}">{{ page.title }}</a></li>
                 {% endfor %}
-            </ul>
-            {% else %}
-                <strong>No pages currently in category.</strong>
-            {% endif %}
+                </ul>
         {% else %}
-            The specified category {{ category_name }} does not exist!<br/>
-            Did you look at the right place?<br/>
-            <a href="/rango/">Click to go back to the Home page!</a><br />
-            <img src="{% static "images/rango_cat_not_found.jpg" %}" alt="Picture of Rango" />
-        {% endif %}
-    </body>
-</html>
+                <strong>No pages currently in category.</strong>
+    {% endif %}
+
+        {% if user.is_authenticated %}
+	        <a href="{% url 'add_page' category.slug %}">Add a Page</a>
+	        {% endif %}
+        {% else %}
+	        The specified category {{ category_name }} does not exist!<br/>
+	        Did you look at the right place?<br/>
+	        <a href="{% url 'index' %}">Click to go back to the Home page!</a><br />
+	        <img src="{% static "images/rango_cat_not_found.jpg" %}" alt="Picture of Rango" />
+	    {% endif %}
+
+{% endblock %}
