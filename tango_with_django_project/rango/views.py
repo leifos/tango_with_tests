@@ -256,10 +256,7 @@ def user_login(request):
                 return HttpResponse("Your Rango account is disabled.")
         else:
             # Bad login details were provided. So we can't log the user in.
-            if not username or not password:
-                invalid_login = "Username and/or Password fields empty"
-            else:
-                invalid_login = "The login information for the user \"{0}\" doesn't match our database.".format(username)
+            invalid_login = "The username/password is incorrect. Please try again."
             return render(request, 'rango/login.html', {'invalid_login': invalid_login})
 
     # The request is not a HTTP POST, so display the login form.
