@@ -69,6 +69,7 @@ class Chapter10ViewTests(TestCase):
         for page in pages:
             response = self.client.get(page)
             base_html = loader.get_template('base.html')
+            print page
             self.assertTrue(any(base_html.name == template.name for template in response.templates))
 
     def test_pages_using_templates(self):
