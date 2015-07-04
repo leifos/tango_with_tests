@@ -1,8 +1,12 @@
 from django import forms
-from rango.models import Page, Category
 from django import forms
 from django.contrib.auth.models import User
 from rango.models import Category, Page, UserProfile
+from rango.models import Page, Category
+from registration.forms import RegistrationForm
+from registration.models import RegistrationProfile
+from django.contrib.auth.middleware import AuthenticationMiddleware
+
 
 class CategoryForm(forms.ModelForm):
     name = forms.CharField(max_length=128, help_text="Please enter the category name.")
@@ -43,7 +47,6 @@ class UserForm(forms.ModelForm):
         model = User
         fields = ('username', 'email', 'password')
 
-class UserProfileForm(forms.ModelForm):
-    class Meta:
-        model = UserProfile
-        fields = ('website', 'picture')
+class UserProfileForm(RegistrationForm):
+    website = forms.URLField(required=False)
+    picture = forms.ImageField(required=False)

@@ -39,9 +39,7 @@ class Chapter12LiveServerTests(StaticLiveServerTestCase):
         password2_field.send_keys('test1234')
 
         # Submit
-        self.browser.find_element_by_css_selector(
-            "input[type='submit']"
-        ).click()
+        self.browser.find_element_by_name('submit').click()
 
         # Check if it is in the home page (redirected)
         self.assertEquals(self.browser.current_url, self.live_server_url + '/rango/')
@@ -124,22 +122,22 @@ class Chapter12ViewTests(TestCase):
 
         #Username label and input text
         self.assertIn('Username:', response.content)
-        self.assertIn('name="username" type="text"', response.content)
+        self.assertIn('name="username"', response.content)
 
         #Email label and input email
         self.assertIn('E-mail:', response.content)
-        self.assertIn('name="email" type="email"', response.content)
+        self.assertIn('name="email"', response.content)
 
         #Password label and input password
         self.assertIn('Password:', response.content)
-        self.assertIn('name="password1" type="password"', response.content)
+        self.assertIn('name="password1"', response.content)
 
         #Password label and input password
         self.assertIn('Password confirmation:', response.content)
-        self.assertIn('name="password2" type="password"', response.content)
+        self.assertIn('name="password2"', response.content)
 
         # Check submit button
-        self.assertIn('type="submit" value="Register"', response.content)
+        self.assertIn('type="submit"', response.content)
 
     def test_links_are_updated_in_base_template(self):
         # Create user and log in

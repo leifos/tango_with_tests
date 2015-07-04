@@ -4,10 +4,12 @@
 
 {% block body_block %}
 
-<h1>Add a page to {{category.name}} category!</h1>
+<div class="page-header">
+	<h1>Add a page to {{category.name}} category!</h1>
+</div>
 
-<form id="page_form" method="post" action="{% url 'add_page'  category.slug %}">
-
+<form role="form"  id="page_form" method="post" action="{% url 'add_page'  category.slug %}">
+<h2 class="form-signin-heading">Add a Page to <a href="{% url 'category'  category.slug %}"> {{ category.name }}</a></h2>
     {% csrf_token %}
     {% for hidden in form.hidden_fields %}
         {{ hidden }}
@@ -15,11 +17,11 @@
 
     {% for field in form.visible_fields %}
         {{ field.errors }}
-        {{ field.help_text }}
+        {{ field.help_text }}<br/>
         {{ field }}<br/>
     {% endfor %}
-
-    <input type="submit" name="submit" value="Create Page" />
+	<br/>
+    <button class="btn btn-primary" type="submit" name="submit">Add Page</button>
 </form>
 
 {% endblock %}

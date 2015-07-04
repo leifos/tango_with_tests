@@ -5,11 +5,15 @@
 {% block title %}About{% endblock %}
 
 {% block body_block %}
-
-<h1>Rango says...</h1>
-This is the about page!<br />
-{{ standardmessage }}</br>
-<p> visits: {{ visits }}</p>
-<img src="{% static "images/enzo.jpg" %}" alt="Enzo Roiz" />
+<div class="page-header">
+	<h1>About</h1>
+</div>
+<div>
+	<h1>Rango says...</h1>
+	This is the about page!<br />
+	{{ standardmessage }}</br>
+	<p><strong>visits: {{ visits }}</strong> </p>
+	<img src="{% static "images/enzo.jpg" %}" alt="Enzo Roiz" />
+</div>
 
 {% endblock %}
