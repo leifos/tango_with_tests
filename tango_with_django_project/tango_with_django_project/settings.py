@@ -49,6 +49,7 @@ INSTALLED_APPS = (
     'ch11tests',
     'ch12tests',
     'ch13tests',
+    'ch14tests',
 )
 
 MIDDLEWARE_CLASSES = (
