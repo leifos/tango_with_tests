@@ -11,6 +11,8 @@ from rango.forms import PageForm
 from rango.forms import UserForm, UserProfileForm
 from rango.models import Category
 from rango.models import Page
+from django.shortcuts import redirect
+
 
 
 def index(request):
@@ -87,9 +89,16 @@ def category(request, category_name_slug):
         category = Category.objects.get(slug=category_name_slug)
         context_dict['category_name'] = category.name
 
+        # Count the category views
+        try:
+            category.views = category.views + 1
+            category.save()
+        except:
+            pass
+
         # Retrieve all of the associated pages.
         # Note that filter returns >= 1 model instance.
-        pages = Page.objects.filter(category=category)
+        pages = Page.objects.filter(category=category).order_by('-views')
 
         # Adds our results list to the template context under name pages.
         context_dict['pages'] = pages
@@ -294,3 +303,36 @@ def search(request):
 # 
 #     # Take the user back to the homepage.
 #     return HttpResponseRedirect('/rango/')
+
+def track_url(request):
+    page_id = None
+    url = '/rango/'
+    if request.method == 'GET':
+        if 'page_id' in request.GET:
+            page_id = request.GET['page_id']
+            try:
+                page = Page.objects.get(id=page_id)
+                page.views = page.views + 1
+                page.save()
+                url = page.url
+            except:
+                pass
+
+    return redirect(url)
+
+@login_required
+def like_category(request):
+
+    cat_id = None
+    if request.method == 'GET':
+        cat_id = request.GET['category_id']
+
+    likes = 0
+    if cat_id:
+        cat = Category.objects.get(id=int(cat_id))
+        if cat:
+            likes = cat.likes + 1
+            cat.likes =  likes
+            cat.save()
+
+    return HttpResponse(likes)
