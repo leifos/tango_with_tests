@@ -81,6 +81,18 @@ def category(request, category_name_slug):
 
     # Create a context dictionary which we can pass to the template rendering engine.
     context_dict = {}
+    context_dict['result_list'] = None
+    context_dict['query'] = None
+
+    if request.method == 'POST':
+        query = request.POST['query'].strip()
+
+        if query:
+            # Run our Bing function to get the results list!
+            result_list = run_query(query)
+
+            context_dict['result_list'] = result_list
+            context_dict['query'] = query
 
     try:
         # Can we find a category name slug with the given name?
@@ -113,6 +125,9 @@ def category(request, category_name_slug):
         # We get here if we didn't find the specified category.
         # Don't do anything - the template displays the "no category" message for us.
         pass
+
+    if not context_dict['query']:
+        context_dict['query'] = category.name
 
     # Go render the response and return it to the client.
     return render(request, 'rango/category.html', context_dict)
@@ -336,3 +351,46 @@ def like_category(request):
             cat.save()
 
     return HttpResponse(likes)
+
+@login_required
+def category_search(request):
+    context_dict = {}
+    context_dict['result_list'] = None
+    context_dict['query'] = None
+    if request.method == 'GET':
+        query = request.GET['query'].strip()
+        if query:
+            # Run our Bing function to get the results list!
+            result_list = run_query(query)
+
+            context_dict['result_list'] = result_list
+            context_dict['query'] = query
+
+    return render(request, 'rango/category_search.html', context_dict)
+
+def suggest_category(request):
+
+    def get_category_list(max_results=0, starts_with=''):
+        cat_list = Category.objects.all()
+        if starts_with:
+            cat_list = Category.objects.filter(name__istartswith=starts_with)
+
+        if max_results > 0:
+            if len(cat_list) > max_results:
+                cat_list = cat_list[:max_results]
+
+        return cat_list
+
+    starts_with = ''
+    catid = None
+    act_cat = None
+
+    if request.method == 'GET':
+        starts_with = request.GET['suggestion']
+        if request.GET['catid'] != '':
+            catid = request.GET['catid']
+            act_cat = Category.objects.get(id=catid)
+
+    cats = get_category_list(8, starts_with)
+
+    return render(request, 'rango/cats.html', {'cats': cats, 'act_cat': act_cat })

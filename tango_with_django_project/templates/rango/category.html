@@ -52,9 +52,18 @@
             {% endif %}
 
         </p>
-        <br/>
         <p>
             	Category views: {{ category.views }}
         </p>
+
+        {% if user.is_authenticated %}
+        <div class="form-inline">
+             <!-- Display the search form elements here -->
+             <input class="form-control" type="text" size="50" name="query" value="{{query}}" id="query" />
+             <input id="search" class="btn btn-primary" type="submit" name="submit" value="Search" />
+        </div>
+        {% endif %}
+<div id="search_results">
+</div>
 
 {% endblock %}
