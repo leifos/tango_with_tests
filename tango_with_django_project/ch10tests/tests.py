@@ -21,35 +21,35 @@ class Chapter10ViewTests(TestCase):
         categories = test_utils.create_categories()
 
         # Access index and check the title displayed
-        response = self.client.get('/rango/')
+        response = self.client.get(reverse('index'))
         self.assertIn('<title>Rango - How to Tango with Django!</title>', response.content)
 
         # Access category page and check the title displayed
-        response = self.client.get('/rango/category/' + categories[0].slug + '/')
+        response = self.client.get(reverse('category', args=[categories[0].slug]))
         self.assertIn('<title>Rango - ' + categories[0].name + '</title>', response.content)
 
         # Access about page and check the title displayed
-        response = self.client.get('/rango/about/')
+        response = self.client.get(reverse('about'))
         self.assertIn('<title>Rango - About</title>', response.content)
 
         # Access login page and check the title displayed
-        response = self.client.get('/rango/login/')
+        response = self.client.get(reverse('login'))
         self.assertIn('<title>Rango - Login</title>', response.content)
 
         # Access register page and check the title displayed
-        response = self.client.get('/rango/register/')
+        response = self.client.get(reverse('register'))
         self.assertIn('<title>Rango - Register</title>', response.content)
 
         # Access restricted page and check the title displayed
-        response = self.client.get('/rango/restricted/')
+        response = self.client.get(reverse('restricted'))
         self.assertIn('<title>Rango - Restricted Page</title>', response.content)
 
         # Access add page and check the title displayed
-        response = self.client.get('/rango/category/' + categories[0].slug + '/add_page/')
+        response = self.client.get(reverse('add_page', args=[categories[0].slug]))
         self.assertIn('<title>Rango - Add Page</title>', response.content)
 
         # Access add new category page and check the title displayed
-        response = self.client.get('/rango/add_category/')
+        response = self.client.get(reverse('add_category'))
         self.assertIn('<title>Rango - Add Category</title>', response.content)
 
     def test_templates_inherits_from_base_template(self):
@@ -61,9 +61,9 @@ class Chapter10ViewTests(TestCase):
         categories = test_utils.create_categories()
 
         # Create a list of pages to access
-        pages = ['/rango/', '/rango/about/', '/rango/add_category/', '/rango/register/', '/rango/login/',
-                 '/rango/category/' + categories[0].slug + '/', '/rango/category/' + categories[0].slug + '/add_page/',
-                 '/rango/restricted/']
+        pages = [reverse('index'), reverse('about'), reverse('add_category'), reverse('register'), reverse('login'),
+                 reverse('category', args=[categories[0].slug]), reverse('add_page', args=[categories[0].slug]),
+                 reverse('restricted')]
 
         # For each page in the page list, check if it extends from base template
         for page in pages:
@@ -80,9 +80,9 @@ class Chapter10ViewTests(TestCase):
         # Create categories
         categories = test_utils.create_categories()
         # Create a list of pages to access
-        pages = ['/rango/', '/rango/about/', '/rango/add_category/', '/rango/register/', '/rango/login/',
-                 '/rango/category/' + categories[0].slug + '/', '/rango/category/' + categories[0].slug + '/add_page/',
-                 '/rango/restricted/']
+        pages = [reverse('index'), reverse('about'), reverse('add_category'), reverse('register'), reverse('login'),
+                 reverse('category', args=[categories[0].slug]), reverse('add_page', args=[categories[0].slug]),
+                 reverse('restricted')]
 
         # Create a list of pages to access
         templates = ['rango/index.html', 'rango/about.html', 'rango/add_category.html', 'rango/register.html',
@@ -99,7 +99,7 @@ class Chapter10ViewTests(TestCase):
         self.client.login(username='testuser', password='test1234')
 
         # Access index page
-        response = self.client.get('/rango/')
+        response = self.client.get(reverse('index'))
 
         # Check links that appear for logged person only
         self.assertIn(reverse('add_category'), response.content)
@@ -109,7 +109,7 @@ class Chapter10ViewTests(TestCase):
 
     def test_url_reference_in_index_page_when_not_logged(self):
         #Access index page with user not logged
-        response = self.client.get('/rango/')
+        response = self.client.get(reverse('index'))
 
         # Check links that appear for logged person only
         self.assertIn(reverse('register'), response.content)
@@ -118,7 +118,7 @@ class Chapter10ViewTests(TestCase):
 
     def test_link_to_index_in_base_template(self):
         # Access index
-        response = self.client.get('/rango/')
+        response = self.client.get(reverse('index'))
 
         # Check for url referencing index
         self.assertIn(reverse('index'), response.content)
@@ -132,12 +132,12 @@ class Chapter10ViewTests(TestCase):
         test_utils.create_categories()
 
         # Check for add_page in category page
-        response = self.client.get('/rango/category/category-1/')
+        response = self.client.get(reverse('category', args=['category-1']))
         self.assertIn(reverse('add_page', args=['category-1']), response.content)
 
     def test_link_to_home_in_about_page_no_longer_exists(self):
         # Access about page
-        response = self.client.get('/rango/about/')
+        response = self.client.get(reverse('about'))
 
         # Check there is only one link to index
         self.assertEquals(response.content.count('href="' + reverse('index') + '"'), 1)

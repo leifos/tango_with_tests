@@ -1,12 +1,13 @@
 from django.test import TestCase
 from datetime import datetime, timedelta
+from django.core.urlresolvers import reverse
 
 # Create your tests here.
 class Chapter11SessionTests(TestCase):
     def test_user_number_of_access_and_last_access_to_index(self):
         #Access index page 100 times
         for i in xrange(0, 100):
-            self.client.get('/rango/')
+            self.client.get(reverse('index'))
             session = self.client.session
 
             # Check it exists visits and last_visit attributes on session
@@ -30,30 +31,30 @@ class Chapter11SessionTests(TestCase):
 class Chapter11ViewTests(TestCase):
     def test_index_shows_number_of_visits(self):
         #Access index
-        response = self.client.get('/rango/')
+        response = self.client.get(reverse('index'))
 
         # Check it contains visits message
         self.assertIn('visits: 1', response.content)
 
     def test_about_page_shows_number_of_visits(self):
         #Access index page to count one visit
-        self.client.get('/rango/')
+        self.client.get(reverse('index'))
 
         # Access about page
-        response = self.client.get('/rango/about/')
+        response = self.client.get(reverse('about'))
 
         # Check it contains visits message
         self.assertIn('visits: 1', response.content)
 
     def test_visit_number_is_passed_via_context(self):
         #Access index
-        response = self.client.get('/rango/')
+        response = self.client.get(reverse('index'))
 
         # Check it contains visits message in the context
         self.assertIn('visits', response.context)
 
         #Access about page
-        response = self.client.get('/rango/about/')
+        response = self.client.get(reverse('about'))
 
         # Check it contains visits message in the context
         self.assertIn('visits', response.context)

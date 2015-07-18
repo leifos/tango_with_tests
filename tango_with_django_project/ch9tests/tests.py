@@ -9,6 +9,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.files.storage import default_storage
 from django.conf import settings
 import os.path
+from django.core.urlresolvers import reverse
 
 class Chapter9LiveServerTests(StaticLiveServerTestCase):
     fixtures = ['admin_user.json']
@@ -22,7 +23,7 @@ class Chapter9LiveServerTests(StaticLiveServerTestCase):
 
     def test_register_user(self):
         #Access index page
-        self.browser.get(self.live_server_url + '/rango/')
+        self.browser.get(self.live_server_url + reverse('index'))
 
         #Click in Register
         self.browser.find_elements_by_link_text('Register Here')[0].click()
@@ -55,7 +56,7 @@ class Chapter9LiveServerTests(StaticLiveServerTestCase):
 
     def test_admin_contains_user_profile(self):
         # Access admin page
-        self.browser.get(self.live_server_url + '/admin/')
+        self.browser.get(self.live_server_url + reverse('admin:index'))
 
         # Log in the admin page
         test_utils.login(self)
@@ -78,7 +79,7 @@ class Chapter9LiveServerTests(StaticLiveServerTestCase):
 
     def test_links_in_index_page_when_logged(self):
         # Access login page
-        self.browser.get(self.live_server_url + '/rango/login/')
+        self.browser.get(self.live_server_url + reverse('login'))
 
         # Log in
         test_utils.login(self)
@@ -96,7 +97,7 @@ class Chapter9LiveServerTests(StaticLiveServerTestCase):
 
     def test_links_in_index_page_when_not_logged(self):
         #Access index page
-        self.browser.get(self.live_server_url + '/rango/')
+        self.browser.get(self.live_server_url + reverse('index'))
 
         #Check links that appear for not logged person only
         self.browser.find_element_by_link_text('Register Here')
@@ -111,7 +112,7 @@ class Chapter9LiveServerTests(StaticLiveServerTestCase):
 
     def test_logout_link(self):
         # Access login page
-        self.browser.get(self.live_server_url + '/rango/login/')
+        self.browser.get(self.live_server_url + reverse('login'))
 
         # Log in
         test_utils.login(self)
@@ -125,7 +126,7 @@ class Chapter9LiveServerTests(StaticLiveServerTestCase):
 
     def test_add_category_when_logged(self):
         # Access login page
-        self.browser.get(self.live_server_url + '/rango/login/')
+        self.browser.get(self.live_server_url + reverse('login'))
 
         # Log in
         test_utils.login(self)
@@ -149,7 +150,7 @@ class Chapter9LiveServerTests(StaticLiveServerTestCase):
 
     def test_add_category_when_not_logged(self):
         #Access add category page
-        self.browser.get(self.live_server_url + '/rango/add_category/')
+        self.browser.get(self.live_server_url + reverse('add_category'))
 
         # Check login form is displayed
         # username
@@ -164,7 +165,7 @@ class Chapter9LiveServerTests(StaticLiveServerTestCase):
         test_utils.create_categories()
 
         # Access login page
-        self.browser.get(self.live_server_url + '/rango/login/')
+        self.browser.get(self.live_server_url + reverse('login'))
 
         # Log in
         test_utils.login(self)
@@ -198,7 +199,7 @@ class Chapter9LiveServerTests(StaticLiveServerTestCase):
         test_utils.create_categories()
 
         # Access index
-        self.browser.get(self.live_server_url + '/rango/')
+        self.browser.get(self.live_server_url + reverse('index'))
 
         # Click category
         self.browser.find_element_by_partial_link_text('Category').click()
@@ -209,7 +210,7 @@ class Chapter9LiveServerTests(StaticLiveServerTestCase):
 
         # Access add page directly
         category = Category.objects.all()[0]
-        self.browser.get(self.live_server_url + '/rango/category/' + category.slug + '/add_page/')
+        self.browser.get(self.live_server_url + reverse('add_page', args=[category.slug]))
 
         # Check login form is displayed
         # username
@@ -220,7 +221,7 @@ class Chapter9LiveServerTests(StaticLiveServerTestCase):
 
     def test_access_restricted_page_when_logged(self):
         # Access login page
-        self.browser.get(self.live_server_url + '/rango/login/')
+        self.browser.get(self.live_server_url + reverse('login'))
 
         # Log in
         test_utils.login(self)
@@ -234,7 +235,7 @@ class Chapter9LiveServerTests(StaticLiveServerTestCase):
 
     def test_access_restricted_page_when_not_logged(self):
         # Access restricted page
-        self.browser.get(self.live_server_url + '/rango/restricted/')
+        self.browser.get(self.live_server_url + reverse('restricted'))
 
         # Check login form is displayed
         # username
@@ -245,7 +246,7 @@ class Chapter9LiveServerTests(StaticLiveServerTestCase):
 
     def test_logged_user_message_in_index(self):
         # Access login page
-        self.browser.get(self.live_server_url + '/rango/login/')
+        self.browser.get(self.live_server_url + reverse('login'))
 
         # Log in
         test_utils.login(self)
@@ -273,7 +274,7 @@ class Chapter9ModelTests(TestCase):
 class Chapter9ViewTests(TestCase):
     def test_registration_form_is_displayed_correctly(self):
         #Access registration page
-        response = self.client.get('/rango/register/')
+        response = self.client.get(reverse('register'))
 
         # Check if form is rendered correctly
         self.assertIn('<h1>Register with Rango</h1>', response.content)
@@ -298,7 +299,7 @@ class Chapter9ViewTests(TestCase):
 
     def test_login_form_is_displayed_correctly(self):
         #Access login page
-        response = self.client.get('/rango/login/')
+        response = self.client.get(reverse('login'))
 
         #Check form display
         #Header
@@ -317,7 +318,7 @@ class Chapter9ViewTests(TestCase):
 
     def test_login_provide_error_message(self):
         # Access login page
-        response = self.client.post('/rango/login/', {'username': 'wronguser', 'password': 'wrongpass'})
+        response = self.client.post(reverse('login'), {'username': 'wronguser', 'password': 'wrongpass'})
 
         self.assertIn('The username/password is incorrect. Please try again.', response.content)
 
@@ -326,15 +327,15 @@ class Chapter9ViewTests(TestCase):
         test_utils.create_user()
 
         # Access login page via POST with user data
-        response = self.client.post('/rango/login/', {'username': 'testuser', 'password': 'test1234'})
+        response = self.client.post(reverse('login'), {'username': 'testuser', 'password': 'test1234'})
 
         # Check it redirects to index
-        self.assertRedirects(response, '/rango/')
+        self.assertRedirects(response, reverse('index'))
 
     def test_upload_image(self):
         # Create fake user and image to upload to register user
         image = SimpleUploadedFile("testuser.jpg", "file_content", content_type="image/jpeg")
-        response = self.client.post('/rango/register/',
+        response = self.client.post(reverse('register'),
                          {'username': 'testuser', 'password':'test1234',
                           'email':'testuser@testuser.com',
                           'website':'http://www.testuser.com',

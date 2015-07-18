@@ -4,7 +4,7 @@ import test_utils
 from rango.models import Category, Page
 from selenium import webdriver
 import populate_rango
-
+from django.core.urlresolvers import reverse
 class Chapter7ModelTests(TestCase):
     def test_category_contains_slug_field(self):
         #Create a new category
@@ -24,7 +24,7 @@ class Chapter7ModelTests(TestCase):
 class Chapter7ViewTests(TestCase):
     def test_index_context(self):
         # Access index with empty database
-        response = self.client.get('/rango/')
+        response = self.client.get(reverse('index'))
 
         # Context dictionary is then empty
         self.assertItemsEqual(response.context['categories'], [])
@@ -34,7 +34,7 @@ class Chapter7ViewTests(TestCase):
         test_utils.create_pages(categories)
 
         #Access index with database filled
-        response = self.client.get('/rango/')
+        response = self.client.get(reverse('index'))
 
         #Retrieve categories and pages from database
         categories = Category.objects.order_by('-likes')[:5]
@@ -49,7 +49,7 @@ class Chapter7ViewTests(TestCase):
         test_utils.create_categories()
 
         # Access index
-        response = self.client.get('/rango/')
+        response = self.client.get(reverse('index'))
 
         # Check if the 5 pages with most likes are displayed
         for i in xrange(10, 5, -1):
@@ -57,7 +57,7 @@ class Chapter7ViewTests(TestCase):
 
     def test_index_displays_no_categories_message(self):
         # Access index with empty database
-        response = self.client.get('/rango/')
+        response = self.client.get(reverse('index'))
 
         # Check if no categories message is displayed
         self.assertIn("There are no categories present.", response.content)
@@ -70,7 +70,7 @@ class Chapter7ViewTests(TestCase):
         test_utils.create_pages(categories)
 
         # Access index
-        response = self.client.get('/rango/')
+        response = self.client.get(reverse('index'))
 
         # Check if the 5 pages with most views are displayed
         for i in xrange(20, 15, -1):
@@ -82,12 +82,12 @@ class Chapter7ViewTests(TestCase):
         categories = test_utils.create_categories()
 
         # Access index
-        response = self.client.get('/rango/')
+        response = self.client.get(reverse('index'))
 
         # Check if the 5 pages with most likes are displayed
         for i in xrange(10, 5, -1):
             category = categories[i - 1]
-            self.assertIn('/rango/category/' + category.slug, response.content)
+            self.assertIn(reverse('category', args=[category.slug]), response.content)
 
     def test_category_context(self):
         #Create categories and pages for categories
@@ -96,7 +96,7 @@ class Chapter7ViewTests(TestCase):
 
         # For each category check the context dictionary passed via render() function
         for category in categories:
-            response = self.client.get('/rango/category/' + category.slug + '/')
+            response = self.client.get(reverse('category', args=[category.slug]))
             pages = Page.objects.filter(category=category)
             self.assertEquals(response.context['category_name'], category.name)
             self.assertItemsEqual(response.context['pages'], pages)
@@ -107,7 +107,7 @@ class Chapter7ViewTests(TestCase):
         test_utils.create_categories()
 
         # Access category page
-        response = self.client.get('/rango/category/category-1/')
+        response = self.client.get(reverse('category', args=['category-1']))
 
         # check was used the right template
         self.assertTemplateUsed(response, 'rango/category.html')
@@ -122,7 +122,7 @@ class Chapter7ViewTests(TestCase):
         # For each category, access its page and check for the pages associated with it
         for category in categories:
             # Access category page
-            response = self.client.get('/rango/category/' + category.slug + '/')
+            response = self.client.get(reverse('category', args=[category.slug]))
 
             # Retrieve pages for that category
             pages = Page.objects.filter(category=category)
@@ -139,16 +139,16 @@ class Chapter7ViewTests(TestCase):
         # For each category, access its page and check there are no pages associated with it
         for category in categories:
             # Access category page
-            response = self.client.get('/rango/category/' + category.slug + '/')
+            response = self.client.get(reverse('category', args=[category.slug]))
             self.assertIn("No pages currently in category.", response.content)
 
     def test_category_page_displays_category_does_not_exist_message(self):
         # Try to access categories not saved to database and check the message
-        response = self.client.get('/rango/category/Python/')
+        response = self.client.get(reverse('category', args=['Python']))
         # self.assertIn("The specified category  does not exist!", response.content)
         self.assertIn("does not exist!", response.content)
 
-        response = self.client.get('/rango/category/Django/')
+        response = self.client.get(reverse('category', args=['Django']))
         # self.assertIn("The specified category  does not exist!", response.content)
         self.assertIn("does not exist!", response.content)
 
@@ -167,7 +167,7 @@ class Chapter7LiveServerTests(StaticLiveServerTestCase):
         populate_rango.populate()
 
         # Access admin page
-        self.browser.get(self.live_server_url + '/admin/')
+        self.browser.get(self.live_server_url + reverse('admin:index'))
 
         # Log in the admin page
         test_utils.login(self)
@@ -192,32 +192,32 @@ class Chapter7LiveServerTests(StaticLiveServerTestCase):
         populate_rango.populate()
 
         # Access index page
-        self.browser.get(self.live_server_url + '/rango/')
+        self.browser.get(self.live_server_url + reverse('index'))
 
         #Access Python category page
         category_link = self.browser.find_elements_by_link_text('Python')
         category_link[0].click()
 
         # Check it is in the correct page
-        self.assertEquals(self.browser.current_url, self.live_server_url + "/rango/category/python/")
+        self.assertEquals(self.browser.current_url, self.live_server_url + reverse('category', args=['python']))
 
 
         # Access index page
-        self.browser.get(self.live_server_url + '/rango/')
+        self.browser.get(self.live_server_url + reverse('index'))
 
         #Access Django category page
         category_link = self.browser.find_elements_by_link_text('Django')
         category_link[0].click()
 
         # Check it is in the correct page
-        self.assertEquals(self.browser.current_url, self.live_server_url + "/rango/category/django/")
+        self.assertEquals(self.browser.current_url, self.live_server_url + reverse('category', args=['django']))
 
         # Access index page
-        self.browser.get(self.live_server_url + '/rango/')
+        self.browser.get(self.live_server_url + reverse('index'))
 
         #Access Other Frameworks category page
         category_link = self.browser.find_elements_by_link_text('Other Frameworks')
         category_link[0].click()
 
         # Check it is in the correct page
-        self.assertEquals(self.browser.current_url, self.live_server_url + "/rango/category/other-frameworks/")
+        self.assertEquals(self.browser.current_url, self.live_server_url + reverse('category', args=['other-frameworks']))

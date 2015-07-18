@@ -8,14 +8,14 @@ from selenium.webdriver.common.keys import Keys
 class Chapter15ViewTests(TestCase):
     def test_search_uses_template(self):
         #Access search page
-        response = self.client.get('/rango/search/')
+        response = self.client.get(reverse('search'))
 
         #Assert it uses search template
         self.assertTemplateUsed(response, 'rango/search.html')
 
     def test_search_form_is_displayed_correctly(self):
         #Access search page
-        response = self.client.get('/rango/search/')
+        response = self.client.get(reverse('search'))
 
         # Check form display
         self.assertContains(response, '<input class="form-control" type="text" size="50" name="query"    '
@@ -34,14 +34,14 @@ class Chapter15ViewTests(TestCase):
 
     def test_nav_bar_contains_link_to_search(self):
         #Access index page
-        response = self.client.get('/rango/')
+        response = self.client.get(reverse('index'))
 
         #Check it has a link to search
         self.assertContains(response, reverse('search'))
 
     def test_result_list(self):
         #Send search data via post
-        response = self.client.post('/rango/search/', {'query':'Django'})
+        response = self.client.post(reverse('search'), {'query':'Django'})
 
         # Get the result list
         result_list = response.context['result_list']
@@ -65,7 +65,7 @@ class Chapter15LiveServerTestCase(StaticLiveServerTestCase):
 
     def test_users_search(self):
         #Access index
-        self.browser.get(self.live_server_url + '/rango/')
+        self.browser.get(self.live_server_url + reverse('index'))
 
         #Click search
         search_link = self.browser.find_element_by_link_text('Search')

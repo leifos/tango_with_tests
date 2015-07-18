@@ -1,10 +1,11 @@
 from django.test import TestCase
 import test_utils
+from django.core.urlresolvers import reverse
 
 class Chapter13ViewTests(TestCase):
     def test_base_uses_bootstrap_css(self):
         # Access index
-        response = self.client.get('/rango/')
+        response = self.client.get(reverse('index'))
         self.assertIn('<link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">',
                       response.content)
         self.assertIn('<link href="http://getbootstrap.com/examples/dashboard/dashboard.css" rel="stylesheet">',
@@ -19,9 +20,9 @@ class Chapter13ViewTests(TestCase):
         categories = test_utils.create_categories()
 
         # Create a list of pages to access
-        pages = ['/rango/', '/rango/about/', '/rango/add_category/', '/accounts/register/', '/accounts/login/',
-                 '/rango/category/' + categories[0].slug + '/', '/rango/category/' + categories[0].slug + '/add_page/',
-                 '/rango/restricted/']
+        pages = [reverse('index'), reverse('about'), reverse('add_category'), reverse('registration_register'), reverse('auth_login'),
+                 reverse('category', args=[categories[0].slug]), reverse('add_page', args=[categories[0].slug]),
+                 reverse('restricted')]
 
         # For each page in the page list, check if it has a page header
         for page in pages:
@@ -34,7 +35,7 @@ class Chapter13ViewTests(TestCase):
         test_utils.create_pages(categories)
 
         #Access index page
-        response = self.client.get('/rango/')
+        response = self.client.get(reverse('index'))
 
         #Check for usage of list-group
         self.assertIn('<ul class="list-group">', response.content)
@@ -42,7 +43,7 @@ class Chapter13ViewTests(TestCase):
 
     def test_headings_in_index_are_using_panel(self):
         #Access index
-        response = self.client.get('/rango/')
+        response = self.client.get(reverse('index'))
 
         # Check panel use for categories
         self.assertIn('<div class="panel panel-primary">', response.content)
@@ -53,7 +54,7 @@ class Chapter13ViewTests(TestCase):
 
     def test_login_page_is_bootstrapped(self):
         # Access login page
-        response = self.client.get('/accounts/login/')
+        response = self.client.get(reverse('auth_login'))
 
         # Check bootstrap CSS
         self.assertIn('<link href="http://getbootstrap.com/examples/signin/signin.css" rel="stylesheet">',
@@ -65,7 +66,7 @@ class Chapter13ViewTests(TestCase):
         self.client.login(username='testuser', password='test1234')
 
         # Access add category page
-        response = self.client.get('/rango/add_category/')
+        response = self.client.get(reverse('add_category'))
 
         #Check it uses bootstrap classes
         self.assertIn('<h2 class="form-signin-heading">', response.content)
@@ -80,7 +81,7 @@ class Chapter13ViewTests(TestCase):
         test_utils.create_categories()
 
         # Access add category page
-        response = self.client.get('/rango/category/category-1/add_page/')
+        response = self.client.get(reverse('add_page', args=['category-1']))
 
         #Check it uses bootstrap classes
         self.assertIn('<h2 class="form-signin-heading">', response.content)
@@ -88,7 +89,7 @@ class Chapter13ViewTests(TestCase):
 
     def test_register_page_is_bootstrapped(self):
         # Access register page
-        response = self.client.get('/accounts/register/')
+        response = self.client.get(reverse('registration_register'))
 
         #Check for bootstrap use
         self.assertIn('<h2 class="form-signin-heading"', response.content)

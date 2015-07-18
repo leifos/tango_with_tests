@@ -4,6 +4,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from rango.forms import CategoryForm, PageForm
 import test_utils
 from rango.models import Category
+from django.core.urlresolvers import reverse
 
 class Chapter8LiveServerTestCase(StaticLiveServerTestCase):
     fixtures = ['admin_user.json']
@@ -17,7 +18,7 @@ class Chapter8LiveServerTestCase(StaticLiveServerTestCase):
 
     def test_form_is_saving_new_category(self):
         # Access index page
-        self.browser.get(self.live_server_url + '/rango/')
+        self.browser.get(self.live_server_url + reverse('index'))
 
         # Check if is there link to add categories
         categories_link = self.browser.find_elements_by_partial_link_text('Add a New Category')
@@ -39,7 +40,7 @@ class Chapter8LiveServerTestCase(StaticLiveServerTestCase):
 
     def test_form_error_when_category_field_empty(self):
         # Access index page
-        self.browser.get(self.live_server_url + '/rango/')
+        self.browser.get(self.live_server_url + reverse('index'))
 
         # Check if is there link to add categories
         categories_link = self.browser.find_elements_by_partial_link_text('Add a New Category')
@@ -61,7 +62,7 @@ class Chapter8LiveServerTestCase(StaticLiveServerTestCase):
         new_category.save()
 
         # Access index page
-        self.browser.get(self.live_server_url + '/rango/')
+        self.browser.get(self.live_server_url + reverse('index'))
 
         # Check if is there link to add categories
         categories_link = self.browser.find_elements_by_partial_link_text('Add a New Category')
@@ -89,7 +90,7 @@ class Chapter8LiveServerTestCase(StaticLiveServerTestCase):
         for category in categories:
             i = i + 1
             # Access link to add page for the category
-            self.browser.get(self.live_server_url + '/rango/category/' + category.slug + '/add_page/')
+            self.browser.get(self.live_server_url + reverse('add_page', args=[category.slug]))
 
             # Types new page name
             username_field = self.browser.find_element_by_name('title')
@@ -97,7 +98,7 @@ class Chapter8LiveServerTestCase(StaticLiveServerTestCase):
 
             # Types url for the page
             username_field = self.browser.find_element_by_name('url')
-            username_field.send_keys('http://www.newpage' + str(1) + '.com')
+            username_field.send_keys('http://www.newpage1.com')
 
             # Click on Create Page
             self.browser.find_element_by_css_selector(
@@ -142,15 +143,15 @@ class Chapter8LiveServerTestCase(StaticLiveServerTestCase):
 class Chapter8ViewTests(TestCase):
     def test_index_contains_link_to_add_category(self):
         # Access index
-        response = self.client.get('/rango/')
+        response = self.client.get(reverse('index'))
 
         # Check if there is text and a link to add category
         self.assertIn('Add a New Category', response.content)
-        self.assertIn('href="/rango/add_category/"', response.content)
+        self.assertIn('href="' + reverse('add_category') + '"', response.content)
 
     def test_add_category_form_is_displayed_correctly(self):
         # Access add category page
-        response = self.client.get('/rango/add_category/')
+        response = self.client.get(reverse('add_category'))
 
         # Check form in response context is instance of CategoryForm
         self.assertTrue(isinstance(response.context['form'], CategoryForm))
@@ -175,7 +176,7 @@ class Chapter8ViewTests(TestCase):
 
         for category in categories:
             # Access add category page
-            response = self.client.get('/rango/category/' + category.slug + '/add_page/')
+            response = self.client.get(reverse('add_page', args=[category.slug]))
 
             # Check form in response context is instance of CategoryForm
             self.assertTrue(isinstance(response.context['form'], PageForm))
@@ -200,7 +201,7 @@ class Chapter8ViewTests(TestCase):
 
     def test_access_category_that_does_not_exists(self):
         # Access a category that does not exist
-        response = self.client.get('/rango/category/python/')
+        response = self.client.get(reverse('category', args=['python']))
 
         # Check that it has a response as status code OK is 200
         self.assertEquals(response.status_code, 200)
@@ -210,16 +211,16 @@ class Chapter8ViewTests(TestCase):
 
     def test_link_to_add_page_only_appears_in_valid_categories(self):
         # Access a category that does not exist
-        response = self.client.get('/rango/category/python/')
+        response = self.client.get(reverse('category', args=['python']))
 
         # Check that there is not a link to add page
-        self.assertNotIn(response.content, '/rango/category/python/add_page/')
+        self.assertNotIn(reverse('add_page', args=['python']), response.content)
 
         # Access a category that does not exist
-        response = self.client.get('/rango/category/other-frameworks/')
+        response = self.client.get(reverse('category', args=['other-frameworks']))
 
         # Check that there is not a link to add page
-        self.assertNotIn(response.content, '/rango/category/other-frameworks/add_page/')
+        self.assertNotIn(reverse('add_page', args=['other-frameworks']), response.content)
 
     def test_category_contains_link_to_add_page(self):
         # Crete categories
@@ -227,7 +228,7 @@ class Chapter8ViewTests(TestCase):
 
         # For each category in the database check if contains link to add page
         for category in categories:
-            response = self.client.get('/rango/category/' + category.slug + '/')
-            self.assertIn('/rango/category/' + category.slug + '/add_page/', response.content)
+            response = self.client.get(reverse('category', args=[category.slug]))
+            self.assertIn(reverse('add_page', args=[category.slug]), response.content)
 
 

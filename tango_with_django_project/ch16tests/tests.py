@@ -12,7 +12,7 @@ from selenium.webdriver.common.keys import Keys
 import populate_rango
 import test_utils
 from rango.models import Page
-
+from django.core.urlresolvers import reverse, NoReverseMatch
 
 class Chapter16ViewTests(TestCase):
     # Click through and like collection tests
@@ -23,7 +23,7 @@ class Chapter16ViewTests(TestCase):
 
         #Access a category 10 times
         for i in xrange(1, 11):
-            response = self.client.get('/rango/category/' + categories[0].slug + '/')
+            response = self.client.get(reverse('category', args=[categories[0].slug]))
 
             # Check it has the correct number of views
             self.assertContains(response, 'Category views: ' + str(i))
@@ -37,18 +37,20 @@ class Chapter16ViewTests(TestCase):
         page2.save()
 
         # Access page 1 one time
-        self.client.get('/rango/goto/?page_id=' + str(page1.id))
+        self.client.get(reverse('goto') + '?page_id=' + str(page1.id))
 
         #Access page 2 ten times
         for i in xrange(1, 11):
-            self.client.get('/rango/goto/?page_id=' + str(page2.id))
+            self.client.get(reverse('goto') + '?page_id=' + str(page2.id))
 
         #Access Category 1
-        response = self.client.get('/rango/category/' + categories[0].slug + '/')
+        response = self.client.get(reverse('category', args=[categories[0].slug]))
 
         # Check the pages have the correct number of views
-        self.assertContains(response, '<li><a href="/rango/goto/?page_id=' + str(page1.id) + '">Page 1</a> (1 view)</li>', html=True)
-        self.assertContains(response, '<li><a href="/rango/goto/?page_id=' + str(page2.id) + '">Page 2</a> (10 views)</li>', html=True)
+        self.assertContains(response, '<li><a href="' + reverse('goto') + '?page_id='
+                            + str(page1.id) +'">Page 1</a> (1 view)</li>', html=True)
+        self.assertContains(response, '<li><a href="' + reverse('goto') + '?page_id='
+                            + str(page2.id) + '">Page 2</a> (10 views)</li>', html=True)
 
     def test_pages_are_displayed_in_most_viewed_order(self):
         #Create categories and pages
@@ -58,7 +60,7 @@ class Chapter16ViewTests(TestCase):
         # For each category check that the first page in its context
         # has more views than the second one.
         for category in categories:
-            context = self.client.get('/rango/category/' + category.slug + '/').context
+            context = self.client.get(reverse('category', args=[category.slug])).context
             self.assertGreater(context['pages'][0].views, context['pages'][1].views)
 
     def test_page_redirection(self):
@@ -67,7 +69,7 @@ class Chapter16ViewTests(TestCase):
         pages = Page.objects.all()
 
         for page in pages:
-            response = self.client.get('/rango/goto/?page_id=' + str(page.id))
+            response = self.client.get(reverse('goto') + '?page_id=' + str(page.id))
             self.assertRedirects(response, page.url, fetch_redirect_response=False)
 
     # Category filter and search within categories
@@ -78,7 +80,7 @@ class Chapter16ViewTests(TestCase):
         test_utils.create_user()
 
         # Access a category page
-        response = self.client.get('/rango/category/' + categories[0].slug + '/')
+        response = self.client.get(reverse('category', args=[categories[0].slug]))
 
         # Check if it contains button Search - it should not
         self.assertNotContains(response, 'Search')
@@ -87,24 +89,26 @@ class Chapter16ViewTests(TestCase):
         self.client.login(username='testuser', password='test1234')
 
         # Access a category page
-        response = self.client.get('/rango/category/' + categories[0].slug + '/')
+        response = self.client.get(reverse('category', args=[categories[0].slug]))
 
         # Check if it contains button Search - it now should
         self.assertContains(response, 'Search')
 
+    def test_search_page_no_longer_exists(self):
+        # Try to access search page -> 404 or NoReverseMatch
+        try:
+            response = self.client.get(reverse('search'))
+            self.assertEquals(response.status_code, 404)
+        except:
+            self.assertRaises(NoReverseMatch, reverse, 'search')
+
+
     def test_index_no_longer_contain_search_link(self):
         # Access index
-        response = self.client.get('/rango/')
+        response = self.client.get(reverse('index'))
 
-        # Check if it does not have a link for search
-        self.assertNotContains(response, '<li><a href="/rango/search/">Search</a></li>', html=True)
-
-    def test_search_page_no_longer_exists(self):
-        # Try to access search page
-        response = self.client.get('/rango/search/')
-
-        # Check it result in 404 status code
-        self.assertEquals(response.status_code, 404)
+        # Check if it does not have a clicable link for search
+        self.assertNotContains(response, 'Search', html=True)
 
 
 class Chapter16LiveServerTestCase(StaticLiveServerTestCase):
@@ -124,7 +128,7 @@ class Chapter16LiveServerTestCase(StaticLiveServerTestCase):
         populate_rango.populate()
 
         #Access index
-        self.browser.get(self.live_server_url + '/rango/')
+        self.browser.get(self.live_server_url + reverse('index'))
 
         # Click Python category
         self.browser.find_element_by_link_text("Python").click()
@@ -172,7 +176,7 @@ class Chapter16LiveServerTestCase(StaticLiveServerTestCase):
         populate_rango.populate()
 
         #Access index
-        self.browser.get(self.live_server_url + '/rango/')
+        self.browser.get(self.live_server_url + reverse('index'))
 
         # Click in Python category link
         self.browser.find_element_by_link_text('Python').click()
@@ -203,7 +207,7 @@ class Chapter16LiveServerTestCase(StaticLiveServerTestCase):
         populate_rango.populate()
 
         # Access index
-        self.browser.get(self.live_server_url + '/rango/')
+        self.browser.get(self.live_server_url + reverse('index'))
 
         # Types an existing category - Python
         suggestion_field = self.browser.find_element_by_id('suggestion')
@@ -238,7 +242,7 @@ class Chapter16LiveServerTestCase(StaticLiveServerTestCase):
         categories = test_utils.create_categories()
 
         # Access index
-        self.browser.get(self.live_server_url + '/rango/')
+        self.browser.get(self.live_server_url + reverse('index'))
 
         # Check all categories are displayed
         body_text = self.browser.find_element_by_tag_name('body').text
@@ -263,7 +267,7 @@ class Chapter16LiveServerTestCase(StaticLiveServerTestCase):
         populate_rango.populate()
 
         # Access login page
-        self.browser.get(self.live_server_url + '/accounts/login/')
+        self.browser.get(self.live_server_url + reverse('auth_login'))
         test_utils.login(self)
 
         # Navigate to Python category
@@ -295,7 +299,7 @@ class Chapter16LiveServerTestCase(StaticLiveServerTestCase):
         populate_rango.populate()
 
         # Access index
-        self.browser.get(self.live_server_url + '/rango/')
+        self.browser.get(self.live_server_url + reverse('index'))
 
         # Navigate back to Python category
         self.browser.find_element_by_link_text("Python").click()

@@ -4,6 +4,7 @@ from rango.models import Page, Category
 import populate_rango
 from selenium import webdriver
 import test_utils
+from django.core.urlresolvers import reverse
 
 class Chapter6LiveServerTests(StaticLiveServerTestCase):
     fixtures = ['admin_user.json']
@@ -19,7 +20,7 @@ class Chapter6LiveServerTests(StaticLiveServerTestCase):
         #Populate database
         populate_rango.populate()
 
-        self.browser.get(self.live_server_url + '/admin/')
+        self.browser.get(self.live_server_url + reverse('admin:index'))
 
         # Log in the admin page
         test_utils.login(self)
@@ -34,7 +35,7 @@ class Chapter6LiveServerTests(StaticLiveServerTestCase):
         self.browser.find_elements_by_partial_link_text('Python')
 
         # Check the pages saved by the population script
-        self.browser.get(self.live_server_url + '/admin/rango/page/')
+        self.browser.get(self.live_server_url + reverse('admin:rango_page_changelist'))
         self.browser.find_elements_by_partial_link_text('Flask')
         self.browser.find_elements_by_partial_link_text('Bottle')
         self.browser.find_elements_by_partial_link_text('How to Tango with Django')
@@ -48,7 +49,7 @@ class Chapter6LiveServerTests(StaticLiveServerTestCase):
         #Populate database
         populate_rango.populate()
 
-        self.browser.get(self.live_server_url + '/admin/')
+        self.browser.get(self.live_server_url + reverse('admin:index'))
 
         # Log in the admin page
         test_utils.login(self)
@@ -76,7 +77,7 @@ class Chapter6LiveServerTests(StaticLiveServerTestCase):
 
     def test_can_create_new_category_via_admin_site(self):
         #Access admin page
-        self.browser.get(self.live_server_url + '/admin/')
+        self.browser.get(self.live_server_url + reverse('admin:index'))
 
         # Check if it display admin message
         body = self.browser.find_element_by_tag_name('body')
