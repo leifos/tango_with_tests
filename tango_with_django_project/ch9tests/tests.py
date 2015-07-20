@@ -10,6 +10,7 @@ from django.core.files.storage import default_storage
 from django.conf import settings
 import os.path
 from django.core.urlresolvers import reverse
+from rango.decorators import chapter9
 
 class Chapter9LiveServerTests(StaticLiveServerTestCase):
     fixtures = ['admin_user.json']
@@ -21,6 +22,7 @@ class Chapter9LiveServerTests(StaticLiveServerTestCase):
     def tearDown(self):
         self.browser.quit()
 
+    @chapter9
     def test_register_user(self):
         #Access index page
         self.browser.get(self.live_server_url + reverse('index'))
@@ -77,6 +79,7 @@ class Chapter9LiveServerTests(StaticLiveServerTestCase):
         body = self.browser.find_element_by_tag_name('body')
         self.assertIn(user.username, body.text)
 
+    @chapter9
     def test_links_in_index_page_when_logged(self):
         # Access login page
         self.browser.get(self.live_server_url + reverse('login'))
@@ -110,6 +113,7 @@ class Chapter9LiveServerTests(StaticLiveServerTestCase):
         self.assertNotIn('Restricted Page', body.text)
         self.assertNotIn('Logout', body.text)
 
+    @chapter9
     def test_logout_link(self):
         # Access login page
         self.browser.get(self.live_server_url + reverse('login'))
@@ -123,7 +127,7 @@ class Chapter9LiveServerTests(StaticLiveServerTestCase):
         # Check if it see log in link, thus it is logged out
         self.browser.find_element_by_link_text('Login')
 
-
+    @chapter9
     def test_add_category_when_logged(self):
         # Access login page
         self.browser.get(self.live_server_url + reverse('login'))
@@ -159,7 +163,7 @@ class Chapter9LiveServerTests(StaticLiveServerTestCase):
         # password
         self.browser.find_element_by_name('password')
 
-
+    @chapter9
     def test_add_page_when_logged(self):
         #Create categories
         test_utils.create_categories()
@@ -219,6 +223,7 @@ class Chapter9LiveServerTests(StaticLiveServerTestCase):
         # password
         self.browser.find_element_by_name('password')
 
+    @chapter9
     def test_access_restricted_page_when_logged(self):
         # Access login page
         self.browser.get(self.live_server_url + reverse('login'))
@@ -244,6 +249,7 @@ class Chapter9LiveServerTests(StaticLiveServerTestCase):
         # password
         self.browser.find_element_by_name('password')
 
+    @chapter9
     def test_logged_user_message_in_index(self):
         # Access login page
         self.browser.get(self.live_server_url + reverse('login'))
@@ -272,6 +278,8 @@ class Chapter9ModelTests(TestCase):
         all_profiles[0].website = user_profile.website
 
 class Chapter9ViewTests(TestCase):
+
+    @chapter9
     def test_registration_form_is_displayed_correctly(self):
         #Access registration page
         response = self.client.get(reverse('register'))
@@ -296,7 +304,7 @@ class Chapter9ViewTests(TestCase):
         # Check submit button
         self.assertIn('type="submit" name="submit" value="Register"', response.content)
 
-
+    @chapter9
     def test_login_form_is_displayed_correctly(self):
         #Access login page
         response = self.client.get(reverse('login'))
@@ -316,12 +324,14 @@ class Chapter9ViewTests(TestCase):
         #Submit button
         self.assertIn('input type="submit" name="submit" value="Log in"', response.content)
 
-    def test_login_provide_error_message(self):
+    @chapter9
+    def test_login_provides_error_message(self):
         # Access login page
         response = self.client.post(reverse('login'), {'username': 'wronguser', 'password': 'wrongpass'})
 
         self.assertIn('The username/password is incorrect. Please try again.', response.content)
 
+    @chapter9
     def test_login_redirects_to_index(self):
         # Create a user
         test_utils.create_user()
@@ -332,6 +342,7 @@ class Chapter9ViewTests(TestCase):
         # Check it redirects to index
         self.assertRedirects(response, reverse('index'))
 
+    @chapter9
     def test_upload_image(self):
         # Create fake user and image to upload to register user
         image = SimpleUploadedFile("testuser.jpg", "file_content", content_type="image/jpeg")

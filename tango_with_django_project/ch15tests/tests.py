@@ -2,10 +2,11 @@ from django.test import TestCase
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.core.urlresolvers import reverse
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
+from rango.decorators import chapter15
 
 # Create your tests here.
 class Chapter15ViewTests(TestCase):
+    @chapter15
     def test_search_uses_template(self):
         #Access search page
         response = self.client.get(reverse('search'))
@@ -13,6 +14,7 @@ class Chapter15ViewTests(TestCase):
         #Assert it uses search template
         self.assertTemplateUsed(response, 'rango/search.html')
 
+    @chapter15
     def test_search_form_is_displayed_correctly(self):
         #Access search page
         response = self.client.get(reverse('search'))
@@ -24,7 +26,7 @@ class Chapter15ViewTests(TestCase):
         self.assertContains(response, '<input class="btn btn-primary"'
                                       ' type="submit" name="submit" value="Search" />', html=True)
 
-
+    @chapter15
     def test_search_url_mapping(self):
         #Access search page
         response = self.client.get(reverse('search'))
@@ -32,6 +34,7 @@ class Chapter15ViewTests(TestCase):
         # Check that the rendered page was the search.html
         self.assertEquals(response.request['PATH_INFO'], reverse('search'))
 
+    @chapter15
     def test_nav_bar_contains_link_to_search(self):
         #Access index page
         response = self.client.get(reverse('index'))
@@ -39,6 +42,7 @@ class Chapter15ViewTests(TestCase):
         #Check it has a link to search
         self.assertContains(response, reverse('search'))
 
+    @chapter15
     def test_result_list(self):
         #Send search data via post
         response = self.client.post(reverse('search'), {'query':'Django'})
@@ -63,6 +67,7 @@ class Chapter15LiveServerTestCase(StaticLiveServerTestCase):
     def tearDown(self):
         self.browser.quit()
 
+    @chapter15
     def test_users_search(self):
         #Access index
         self.browser.get(self.live_server_url + reverse('index'))

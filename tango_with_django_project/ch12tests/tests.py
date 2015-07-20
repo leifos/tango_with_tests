@@ -100,19 +100,20 @@ class Chapter12ViewTests(TestCase):
         self.assertIn('<h1>Login to Rango</h1>', response.content)
 
         #Username label and input text
-        self.assertIn('Username:', response.content)
+        self.assertIn('Username', response.content)
         self.assertIn('name="username" type="text"', response.content)
 
         #Password label and input text
-        self.assertIn('Password:', response.content)
+        self.assertIn('Password', response.content)
         self.assertIn('name="password" type="password"', response.content)
 
         #Submit button
-        self.assertIn('input type="submit" value="Log in"', response.content)
+        self.assertIn('type="submit"', response.content)
+        self.assertIn('Sign in', response.content)
 
         #Message for not members
-        self.assertIn('Not a member? <a href="' + reverse('registration_register') + '">Register</a>!',
-                      response.content)
+        self.assertContains(response, '<p>Not a member? <a href="'
+                            + reverse('registration_register') + '">Register</a>!</p>')
 
     def test_new_registration_form_is_displayed_correctly(self):
         #Access registration page

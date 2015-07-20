@@ -5,6 +5,7 @@ from rango.forms import CategoryForm, PageForm
 import test_utils
 from rango.models import Category
 from django.core.urlresolvers import reverse
+from rango.decorators import chapter8
 
 class Chapter8LiveServerTestCase(StaticLiveServerTestCase):
     fixtures = ['admin_user.json']
@@ -16,6 +17,7 @@ class Chapter8LiveServerTestCase(StaticLiveServerTestCase):
     def tearDown(self):
         self.browser.quit()
 
+    @chapter8
     def test_form_is_saving_new_category(self):
         # Access index page
         self.browser.get(self.live_server_url + reverse('index'))
@@ -38,6 +40,7 @@ class Chapter8LiveServerTestCase(StaticLiveServerTestCase):
         # Check if New Category appears in the index page
         self.assertIn('New Category', body.text)
 
+    @chapter8
     def test_form_error_when_category_field_empty(self):
         # Access index page
         self.browser.get(self.live_server_url + reverse('index'))
@@ -56,6 +59,7 @@ class Chapter8LiveServerTestCase(StaticLiveServerTestCase):
         # Check if there is an error message
         self.assertIn('This field is required.', body.text)
 
+    @chapter8
     def test_add_category_that_already_exists(self):
         # Create a category in database
         new_category = Category(name="New Category")
@@ -82,6 +86,7 @@ class Chapter8LiveServerTestCase(StaticLiveServerTestCase):
         # Check if there is an error message
         self.assertIn('Category with this Name already exists.', body.text)
 
+    @chapter8
     def test_form_is_saving_new_page(self):
         #Create categories and pages
         categories = test_utils.create_categories()
@@ -141,6 +146,7 @@ class Chapter8LiveServerTestCase(StaticLiveServerTestCase):
     #         self.assertIn('New Page', body.text)
 
 class Chapter8ViewTests(TestCase):
+    @chapter8
     def test_index_contains_link_to_add_category(self):
         # Access index
         response = self.client.get(reverse('index'))
@@ -149,6 +155,7 @@ class Chapter8ViewTests(TestCase):
         self.assertIn('Add a New Category', response.content)
         self.assertIn('href="' + reverse('add_category') + '"', response.content)
 
+    @chapter8
     def test_add_category_form_is_displayed_correctly(self):
         # Access add category page
         response = self.client.get(reverse('add_category'))
@@ -169,7 +176,7 @@ class Chapter8ViewTests(TestCase):
         # Button
         self.assertIn('type="submit" name="submit" value="Create Category"', response.content)
 
-
+    @chapter8
     def test_add_page_form_is_displayed_correctly(self):
         # Create categories
         categories = test_utils.create_categories()
@@ -198,7 +205,6 @@ class Chapter8ViewTests(TestCase):
             # Button
             self.assertIn('type="submit" name="submit" value="Create Page"', response.content)
 
-
     def test_access_category_that_does_not_exists(self):
         # Access a category that does not exist
         response = self.client.get(reverse('category', args=['python']))
@@ -222,6 +228,7 @@ class Chapter8ViewTests(TestCase):
         # Check that there is not a link to add page
         self.assertNotIn(reverse('add_page', args=['other-frameworks']), response.content)
 
+    @chapter8
     def test_category_contains_link_to_add_page(self):
         # Crete categories
         categories = test_utils.create_categories()

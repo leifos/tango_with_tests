@@ -4,6 +4,7 @@ from django.template import loader
 from django.conf import settings
 import os.path
 from django.core.urlresolvers import reverse
+from rango.decorators import chapter10
 
 class Chapter10ViewTests(TestCase):
     
@@ -12,6 +13,7 @@ class Chapter10ViewTests(TestCase):
         path_to_base = settings.TEMPLATE_PATH + '/base.html'
         self.assertTrue(os.path.isfile(path_to_base))
 
+    @chapter10
     def test_titles_displayed(self):
         # Create user and log in
         test_utils.create_user()
@@ -52,6 +54,7 @@ class Chapter10ViewTests(TestCase):
         response = self.client.get(reverse('add_category'))
         self.assertIn('<title>Rango - Add Category</title>', response.content)
 
+    @chapter10
     def test_templates_inherits_from_base_template(self):
         # Create user and log in
         test_utils.create_user()
@@ -69,9 +72,9 @@ class Chapter10ViewTests(TestCase):
         for page in pages:
             response = self.client.get(page)
             base_html = loader.get_template('base.html')
-            print page
             self.assertTrue(any(base_html.name == template.name for template in response.templates))
 
+    @chapter10
     def test_pages_using_templates(self):
         # Create user and log in
         test_utils.create_user()
@@ -93,6 +96,7 @@ class Chapter10ViewTests(TestCase):
             response = self.client.get(page)
             self.assertTemplateUsed(response, template)
 
+    @chapter10
     def test_url_reference_in_index_page_when_logged(self):
         # Create user and log in
         test_utils.create_user()
@@ -107,6 +111,7 @@ class Chapter10ViewTests(TestCase):
         self.assertIn(reverse('logout'), response.content)
         self.assertIn(reverse('about'), response.content)
 
+    @chapter10
     def test_url_reference_in_index_page_when_not_logged(self):
         #Access index page with user not logged
         response = self.client.get(reverse('index'))
@@ -135,6 +140,7 @@ class Chapter10ViewTests(TestCase):
         response = self.client.get(reverse('category', args=['category-1']))
         self.assertIn(reverse('add_page', args=['category-1']), response.content)
 
+    @chapter10
     def test_link_to_home_in_about_page_no_longer_exists(self):
         # Access about page
         response = self.client.get(reverse('about'))

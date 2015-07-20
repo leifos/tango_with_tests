@@ -4,6 +4,8 @@ import test_utils
 from rango.models import Category, Page
 from selenium import webdriver
 import populate_rango
+from rango.decorators import chapter7
+
 from django.core.urlresolvers import reverse
 class Chapter7ModelTests(TestCase):
     def test_category_contains_slug_field(self):
@@ -112,6 +114,7 @@ class Chapter7ViewTests(TestCase):
         # check was used the right template
         self.assertTemplateUsed(response, 'rango/category.html')
 
+    @chapter7
     def test_category_page_displays_pages(self):
         #Create categories in database
         categories = test_utils.create_categories()
