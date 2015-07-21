@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Users Profiles{% endblock %}
+
+{% block body_block %}
+<div class="page-header">
+	<h1>Users Profiles</h1>
+</div>
+
+<div class="panel">
+	{% if user_list %}
+	<div class="panel-heading">
+		<!-- Display search results in an ordered list -->
+		<div class="panel-body">
+			<div class="list-group">
+				{% for listuser in user_list %}
+				<div class="list-group-item">
+					<h4 class="list-group-item-heading">
+						<a href="{% url 'profile' listuser.username %}">{{ listuser.username }}</a>
+					</h4>
+					<p class="list-group-item-text">E-mail:{{ listuser.email }}</p>
+				</div>
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+	{% else %}
+		<p>There are no users for the site.</p>
+	{% endif %}
+</div>
+{% endblock %}

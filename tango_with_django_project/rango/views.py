@@ -415,7 +415,13 @@ def edit_profile(request):
 
 @login_required
 def profile(request, username):
-    act_user = request.user
-    user = User.objects.get(username=username)
-    user_profile, created = UserProfile.objects.get_or_create(user=user)
+    user = request.user
+    act_user = User.objects.get(username=username)
+    user_profile, created = UserProfile.objects.get_or_create(user=act_user)
     return render(request, 'rango/profile.html', {'user_profile': user_profile, 'act_user': act_user, 'user':user })
+
+@login_required
+def users_profiles(request):
+    user_list = User.objects.all()
+    userprofile_list = UserProfile.objects.all()
+    return render(request, 'rango/users_profiles.html', {'user_list' : user_list, 'userprofile_list' : userprofile_list})

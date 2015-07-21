@@ -53,3 +53,31 @@ def create_user():
     user_profile.save()
 
     return user, user_profile
+
+def create_user(username = None):
+    # Create a user
+    if username:
+        user = User.objects.get_or_create(username=username, password="test1234",
+                                      first_name="Test", last_name="User", email="testuser@testuser.com")[0]
+    else:
+        user = User.objects.get_or_create(username="testuser", password="test1234",
+                                      first_name="Test", last_name="User", email="testuser@testuser.com")[0]
+    user.set_password(user.password)
+    user.save()
+
+    # Create a user profile
+    user_profile = UserProfile.objects.get_or_create(user=user,
+                                                     website="http://www.testuser.com")[0]
+    user_profile.save()
+
+    return user, user_profile
+
+def create_users():
+    # Create 10 different users
+    users_list = []
+
+    #Append each user to the list
+    for i in xrange(1, 6):
+        users_list.append(create_user("testuser" + str(i)))
+
+    return users_list
