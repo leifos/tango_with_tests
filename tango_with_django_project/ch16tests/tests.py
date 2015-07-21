@@ -144,9 +144,24 @@ class Chapter16LiveServerTestCase(StaticLiveServerTestCase):
         self.browser.quit()
 
     def DONTtest_users_can_view_their_profiles(self):
-        pass
+        # Access index
+        self.browser.get(self.live_server_url + reverse('index'))
 
-    def test_user_register_and_add_profile(self):
+        # User click Login link and logs in
+        self.browser.find_element_by_link_text('Login').click()
+        test_utils.login(self)
+
+        # Access view profile and check information
+        self.browser.find_element_by_link_text("View Profile").click()
+        body_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('admin Profile', body_text)
+        self.assertIn('Email: admin@admin.com', body_text)
+
+        # Assert image is the default one
+        img_source = self.browser.find_element_by_tag_name('img').get_attribute("src")
+        self.assertIn('default', img_source)
+
+    def DONTtest_user_register_and_add_profile(self):
         #Access index page
         self.browser.get(self.live_server_url + reverse('index'))
 
@@ -191,7 +206,17 @@ class Chapter16LiveServerTestCase(StaticLiveServerTestCase):
         body_text = self.browser.find_element_by_tag_name('body').text
         self.assertIn('Rango says... hello testuser!', body_text)
 
-        # TODO ACCESS VIEW PROFILE
+        # Access view profile and check information
+        self.browser.find_element_by_link_text("View Profile").click()
+        body_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('testuser Profile', body_text)
+        self.assertIn('Email: testuser@testuser.com', body_text)
+
+        # Assert image was uploaded and it is not the default one
+        img_source = self.browser.find_element_by_tag_name('img').get_attribute("src")
+        self.assertNotIn('default', img_source)
+        self.assertIn('_testuser', img_source)
+
 
     def DONTtest_users_can_edit_their_profiles(self):
         #Access index page
@@ -216,13 +241,6 @@ class Chapter16LiveServerTestCase(StaticLiveServerTestCase):
 
         # Submit form
         self.browser.find_element_by_name("submit").click()
-
-        # Check it is in index page
-        body_text = self.browser.find_element_by_tag_name('body').text
-        self.assertIn('Rango says... hello admin!', body_text)
-
-        # TODO ACCESS VIEW PROFILE
-
 
     def DONTtest_users_can_see_a_list_of_users(self):
         pass

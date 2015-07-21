@@ -412,3 +412,10 @@ def edit_profile(request):
         return redirect(index)
     else:
         return render(request, 'rango/edit_profile.html', {'user_profile':user_profile})
+
+@login_required
+def profile(request, username):
+    act_user = request.user
+    user = User.objects.get(username=username)
+    user_profile, created = UserProfile.objects.get_or_create(user=user)
+    return render(request, 'rango/profile.html', {'user_profile': user_profile, 'act_user': act_user, 'user':user })

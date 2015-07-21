@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}{{ act_user.username }} Profile{% endblock %}
+
+{% block body_block %}
+	<div class="page-header">
+			<h1 id="username" data-username="{{act_user.username}}">{{act_user.username}} Profile</h1>
+		</div>
+		<img src="{{ MEDIA_URL }}{{user_profile.picture }}" width="300" height="300" alt="{{act_user.username}}" />
+		<br/><br/>
+		<div id="profile_data">
+			<p><strong>Email:</strong> {{act_user.email}}</p>
+			<p><strong>Website:</strong> <a target="_blank" href="{{user_profile.website}}">{{user_profile.website}}</a></p>
+			{% if user.username == act_user.username %}
+			<a href="{% url 'edit_profile' %}">
+                <button id="id_edit_profile" data-userid="{{act_user.pk}}" class="btn btn-primary" type="submit" >
+                    Edit profile
+                </button>
+                </a>
+			{% endif %}
+		</div>
+{% endblock %}
