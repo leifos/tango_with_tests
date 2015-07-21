@@ -4,7 +4,7 @@
 <div class="page-header">
 	<h1>Register with Rango</h1>
 </div>
-<form role="form" method="post" action="." enctype="multipart/form-data">
+<form role="form" method="post" action=".">
 	{% csrf_token %}
 
 	<h2 class="form-signin-heading">Sign Up Here</h2>
@@ -82,26 +82,6 @@
 		</p>
 	</div>
 	{% endif %}
-	
-	{% if form.website.errors %}
-	<div class="form-group has-warning has-feedback">
-		<p class="required">
-			<label for="id_website">Website:</label> <input
-				class="form-control" id="id_website" name="website"
-				type="url" placeholder="{% for error in form.website.errors %}{{ error }} {% endfor %}" />
-		</p>
-	</div>
-	{% else %}
-	<div class="form-group">
-		<p class="required">
-			<label for="id_website">Website:</label> <input
-				class="form-control" id="id_website" name="website"
-				type="url" placeholder="Website" />
-		</p>
-	</div>
-	{% endif %}
-	
-	<input id="id_picture" name="picture" type="file" class="btn btn-file btn-default"><br/>
 	
 	<button id="id_submit" name="submit" type="submit" class="btn btn-default">Submit</button>
 

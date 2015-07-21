@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Profile Details{% endblock %}
+
+{% block body_block %}
+<div class="page-header">
+	<h1>Profile Details</h1>
+</div>
+
+<h2 class="form-signin-heading">{{ user.username }} profile</h2>
+<p><img src="{{ MEDIA_URL }}{{ user_profile.picture }}" width="300" height="300" alt="{{ user.username }}" /></p>
+
+<form role="form"  id="edit_profile_form" method="post" action="{% url 'edit_profile' %}" enctype="multipart/form-data">
+{% csrf_token %}
+    {% if form.website.errors %}
+	<div class="form-group has-warning has-feedback">
+		<p class="required">
+			<label for="id_website">Website:</label> <input
+				class="form-control" id="id_website" name="website"
+				type="url" placeholder="{% for error in form.website.errors %}{{ error }} {% endfor %}"/>
+		</p>
+	</div>
+	{% else %}
+	<div class="form-group">
+		<p class="required">
+			<label for="id_website">Website:</label> <input
+				class="form-control" id="id_website" name="website"
+				type="url" placeholder="Website" value="{{ user_profile.website }}"/>
+		</p>
+	</div>
+	{% endif %}
+
+    <label for="id_picture">Picture:</label>
+	<input id="id_picture" name="picture" type="file" class="btn btn-file btn-default">
+	<br/>
+    <button class="btn btn-primary" type="submit" name="submit">Edit profile</button>
+</form>
+
+{% endblock %}

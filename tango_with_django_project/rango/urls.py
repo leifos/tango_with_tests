@@ -15,4 +15,5 @@ urlpatterns = patterns('',
         url(r'^like_category/$', views.like_category, name='like_category'),
         url(r'^category_search/$', views.category_search, name='category_search'),
         url(r'^suggest_category/$', views.suggest_category, name='suggest_category'),
+        url(r'^edit_profile/$', views.edit_profile, name='edit_profile'),
 )

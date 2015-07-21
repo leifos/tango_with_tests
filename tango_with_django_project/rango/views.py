@@ -8,9 +8,8 @@ from django.shortcuts import render
 from rango.bing_search import run_query
 from rango.forms import CategoryForm
 from rango.forms import PageForm
-from rango.forms import UserForm, UserProfileForm
 from rango.models import Category
-from rango.models import Page
+from rango.models import Page, User, UserProfile
 from django.shortcuts import redirect
 
 
@@ -394,3 +393,22 @@ def suggest_category(request):
     cats = get_category_list(8, starts_with)
 
     return render(request, 'rango/cats.html', {'cats': cats, 'act_cat': act_cat })
+
+@login_required
+def edit_profile(request):
+    # Get actual user
+    user = request.user
+    user_profile, created = UserProfile.objects.get_or_create(user=user)
+
+    # Check if request is by POST or GET method
+    if request.method == 'POST':
+        if 'website' in request.POST:
+            user_profile.website = request.POST["website"]
+        if 'picture' in request.FILES:
+            user_profile.picture = request.FILES["picture"]
+
+        user_profile.save()
+
+        return redirect(index)
+    else:
+        return render(request, 'rango/edit_profile.html', {'user_profile':user_profile})
